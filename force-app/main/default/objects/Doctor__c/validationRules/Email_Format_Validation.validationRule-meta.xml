@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Email_Format_Validation</fullName>
+    <active>true</active>
+    <description>Email format is invalid.</description>
+    <errorConditionFormula>NOT REGEX( Email__c  , &quot;^$|[a-z_\\-1-9\\.]+@[a-z]+(\\.[a-z]+)+&quot;)</errorConditionFormula>
+    <errorDisplayField>Email__c</errorDisplayField>
+    <errorMessage>Email format is invalid.</errorMessage>
+</ValidationRule>

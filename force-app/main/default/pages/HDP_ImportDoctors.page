@@ -1,0 +1,72 @@
+<!--
+ - Created by alisa.borkowska on 05.12.2022.
+ -->
+<apex:page id="HDP_DoctorsImport" controller="HDP_ImportDoctorsController" setup="false" sidebar="false"
+           showheader="true"
+           tabStyle="Doctor__c">
+    <apex:form >
+        <apex:sectionHeader title="Doctors" subTitle="Import Doctors"/>
+        <apex:pageBlock >
+            <div align="left">
+                <apex:inputFile value="{!fileContent}" filename="{!Filename}"/>
+                <apex:commandButton disabled="{!isCleared}" value="Clear" action="{!clearDoctorRecords}"/>
+                <apex:commandButton action="{!ReadFile}" value="Upload File" id="UploadButton" style="width:70px;"/>
+                <apex:outputText value="{!errorString}" style="padding:50px;color:red;font-style:italic;"/>
+            </div>
+        </apex:pageBlock>
+        <apex:actionStatus id="loading">
+            <apex:facet name="start">
+                <center>
+                    <img src="{!URLFOR($Resource.Spinner)}" width="180" height="100"/>
+                </center>
+            </apex:facet>
+            <apex:facet name="stop">
+                <apex:pageBlock >
+                    <apex:pageblocktable value="{!uploadedDoctors}" var="doctor" id="doctorsTable">
+                        <apex:column headerValue="Selected">
+                            <apex:inputCheckbox id="Selected" value="{!doctor.doctorSelected}"/>
+                        </apex:column>
+                        <apex:column headerValue="First Name">
+                            <apex:outputText value="{!doctor.doctorFirstName}"/>
+                        </apex:column>
+                        <apex:column headerValue="Last Name">
+                            <apex:outputText value="{!doctor.doctorLastName}"/>
+                        </apex:column>
+                        <apex:column headerValue="Email">
+                            <apex:outputText value="{!doctor.doctorEmail}"/>
+                        </apex:column>
+                        <apex:column headerValue="Country">
+                            <apex:outputText value="{!doctor.doctorCountry}"/>
+                        </apex:column>
+                        <apex:column headerValue="Status">
+                        {!doctor.doctorStatus}
+                            <apex:outputLink rendered="{!doctorExist && doctor.isSuccess}"
+                                             value="{!URLFOR($Action.Doctor__c.View, doctor.doctorID) }" target="_blank"
+                                             id="linkToView">
+                                View
+                            </apex:outputLink>
+                        </apex:column>
+
+                    </apex:pageblocktable>
+                </apex:pageBlock>
+            </apex:facet>
+        </apex:actionStatus>
+        <apex:pageBlock >
+            <div style="width:100%;">
+                <div style="float: left;">
+                    <apex:commandButton action="{!selectAll}" value="All" id="AllSelected" style="width:70px;"/>
+                    <apex:commandButton action="{!selectNone}" value="None" id="NoneSelected"
+                                        style="width:70px;"/>
+                    <apex:commandButton action="{!reverseSelected}" value="Reverse" id="ReverseSelected"
+                                        style="width:70px;"/>
+                </div>
+                <div style="float: right;">
+                    <apex:actionRegion rendered="true">
+                    <apex:commandButton value="Import" style="width:70px;" id="ImportButton"
+                                        action="{!uploadDoctors}" reRender="loading" status="loading"/>
+                    </apex:actionRegion>
+                </div>
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

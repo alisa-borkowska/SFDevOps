@@ -1,0 +1,152 @@
+<apex:page id="HDP_CreateNewDoctorSLDS" controller="HDP_CreateNewDoctorSLDSController" setup="false" sidebar="false"
+           showheader="true"
+           tabStyle="Doctor__c" title="Doctor Search REST API">
+    <head>
+        <apex:slds />
+        <script>
+        const clearInputs = () => {
+            let fields = document.getElementById('inputFields')
+            for (f of fields.children) {
+            inp=f.getElementsByTagName('input');
+            inp[0].value=""
+            }
+        }
+
+        </script>
+    </head>
+    <div class="slds-page-header" role="banner">
+        <div class="slds-grid">
+            <div class="slds-col slds-has-flexi-truncate">
+                <p class="slds-text-heading_label slds-truncate" title="Doctors">Doctors</p>
+                <div class="slds-grid slds-m-left_small">
+                    <h1 class="slds-text-heading_medium slds-truncate" title="Create a new doctor">Create a new
+                        doctor</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <apex:form >
+        <apex:outputPanel id="prompt" styleClass="slds-fade-in-open" rendered="{!success}"
+                          style="position: fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; background: #222a; z-index: 100; display: block;">
+            <div style="position: fixed; left: 30%; top: 30%; width: 40%; height: 40%; z-index: 101;"
+                 class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" style="font-size: 2em;">
+                        Success!</h1>
+                    <p class="slds-m-top_x-small">You just created a new doctor.</p>
+                </div>
+                <div class="slds-modal__footer">
+                    <center>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%" value="Cancel"
+                                            action="{!hidePopup}" status="loading">
+                            <apex:actionSupport reRender="prompt, doctorsTable"/>
+                        </apex:commandButton>
+                    </center>
+                </div>
+            </div>
+        </apex:outputPanel>
+        <div class="slds-grid slds-wrap" id="inputFields">
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="input-01">First Name</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!firstName}" styleClass="slds-input" id="input-01"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="input-02">Last Name</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!lastName}" styleClass="slds-input" id="input-02"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-06">Nationality</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!nationality}" styleClass="slds-input" id="einput-06"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-12">Date of birth</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!dateOfBirth}" styleClass="slds-input" id="einput-12"/>
+                </div>
+            </div>
+            <br/>
+
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                <label class="slds-form-element__label" for="input-03">Email</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!email}" styleClass="slds-input" id="input-03"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                <label class="slds-form-element__label" for="input-05">Phone</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!phone}" styleClass="slds-input" id="input-05"/>
+                </div>
+            </div>
+            <hr/>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-07">Street</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!street}" styleClass="slds-input" id="einput-07"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="input-04">Country</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!country}" styleClass="slds-input" id="input-04"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-10">Postal Code</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!postalCode}" styleClass="slds-input" id="einput-10"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-13">City</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!city}" styleClass="slds-input" id="einput-13"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-08">Start of Career</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!startOfCareer}" styleClass="slds-input" id="einput-08"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-09">Speciality</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!speciality}" styleClass="slds-input" id="einput-09"/>
+                </div>
+            </div>
+
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="einput-11">License Number</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!licenceNumber}" styleClass="slds-input" id="einput-11"/>
+                </div>
+            </div>
+
+        </div>
+        <hr/>
+        <div align="center">
+            <apex:commandButton value="Create" action="{!createDoctorRecords}"
+                                reRender="loading, clearButton, prompt"
+                                status="loading" styleClass="slds-button slds-button_brand"/>
+            <apex:actionSupport action="{!showPopup}"/>
+
+            <apex:commandButton value="Clear"
+                                reRender="loading,clearButton,inputFields,prompt" id="clearButton"
+                                onComplete="clearInputs();"
+                                styleClass="slds-button slds-button_brand"/>
+        </div>
+        <!--        <apex:outputPanel rendered="{!success}" id="isSuccess">-->
+        <!--            <hr/>-->
+        <!--            <div>-->
+        <!--                Success!-->
+        <!--            </div>-->
+        <!--        </apex:outputPanel>-->
+    </apex:form>
+</apex:page>

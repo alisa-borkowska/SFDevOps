@@ -1,0 +1,171 @@
+<apex:page lightningStylesheets="true" sideBar="false" showHeader="false" showChat="false">
+
+  <body style="background-image:url(https://i.imgur.com/dnVayt8.jpeg);">
+    <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8">
+    </META>
+    <center>
+      <iframe name="none" style="display: none;"></iframe>
+      <div class="form2">
+        <div class="header">My Real Estates</div>
+        <div class="mainForm">
+          <form action="https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8" method="POST" target="none">
+            <div class="description">LET US CONTACT YOU!
+              <div class="smallDescription" style="margin: 2%">
+                Type your basic contact information. Our consultant will contact you.
+              </div>
+            </div>
+
+            <input class="slds-input" type="hidden" name="oid" value="00D7S0000023dpX"></input>
+            <input class="slds-input" type="hidden" name="retURL" value="http://"></input>
+            <input class="slds-input" id="first_name" maxlength="40" name="first_name" placeholder="First name" title="Required field"
+              size="20" type="text" required="true"/>
+            <input class="slds-input" id="last_name" maxlength="80" name="last_name" placeholder="Last name" title="Required field" size="20"
+              type="text" required="true" />
+            <input class="slds-input" id="email" maxlength="80" name="email" size="20" placeholder="E-mail" title="Required field"
+              type="email" required="true" />
+            <select id="00N7S0000033gW4" name="00N7S0000033gW4" title="Product Interest" required="true">
+              <option value="">Select product interest</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Business Premise">Business Premise</option>
+            </select>
+            <input class="slds-input" id="company" maxlength="40" name="company" placeholder="Company" size="20"
+              type="text" />
+            <input class="slds-input" type="submit" name="submit" value="SUBMIT" onclick="onClickFun(this)"></input>
+          </form>
+        </div>
+        <div class='mainForm' style="display: none">
+          <div class="description" style="margin: 15%; padding-bottom: 15%">
+            THANK YOU! 
+            <div class="smallDescription" style="margin: 2%">
+              We will contact you as soon as posible. Have a nice day!
+            </div>
+          </div>
+        </div>
+      </div>
+    </center>
+  </body>
+
+
+
+  <style>
+    .form2 {
+      background-color: #fff6;
+      margin: 10% 30%;
+
+    }
+
+    .header {
+      font-size: 30pt;
+      font-family: 'Ink Free';
+      color: white;
+      font-style: italic;
+      padding: 3%;
+      padding-bottom: 0px;
+      text-align: left;
+    }
+
+    .description {
+      font-size: 16pt;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      font-weight: 600;
+      color: white;
+    }
+
+    .smallDescription {
+      font-size: 12pt;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      color: rgb(216, 216, 216);
+    }
+
+    .mainForm input[type=text],
+    .mainForm input[type=email],
+    select,
+    select *,
+    .mainForm input[type=submit] {
+      width: 20vw;
+      margin: 2%;
+      border-color: gainsboro;
+      border-radius: 6px;
+      border-style: solid;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      border-width: 2px;
+      padding: 0.8vh;
+
+
+    }
+
+    select {
+      width: 21vw;
+    }
+
+    .mainForm input[type=submit] {
+      width: 21vw;
+      border-width: 0;
+      background: linear-gradient(45deg, rgba(106, 141, 42, 0.774), rgb(211, 221, 74));
+      font-size: 14pt;
+      font-weight: 600;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      color: white;
+    }
+
+    .mainForm input[type=submit]:hover {
+      background: rgba(25, 133, 119, 0.788);
+    }
+
+    .mainForm {
+      height: 40vh;
+      padding-top: 7%;
+      padding-bottom: 17%;
+      flex: 1;
+      display: flex;
+    }
+
+    .incorrect {
+      border-color: red !important;
+      
+    }
+  </style>
+
+  <script>
+    const onClickFun = () => {
+      document.getElementsByClassName('mainForm').item(0)
+    }
+
+    addEventListener('submit', (e) => {
+      /** @type HTMLElement[] **/
+      const children = e.target.children;
+      let anyincorrect = false;
+      for (child of children) {
+        if (child.classList.contains('description')) continue;
+        let incorrect = false;
+        if (child?.placeholder == 'Company') {
+          if (document.getElementsByTagName('select').item(0).value == 'Business Premise') {
+            if (!child.value) {
+              incorrect = true;
+            }
+          }
+        }
+        else if (!child.value || child.value == 'Select product interest') {
+          incorrect = true;
+        }
+        if (incorrect) {
+          child.classList.add('incorrect');
+          anyincorrect = true;
+        } else {
+          if (child.classList.contains('incorrect')) {
+            child.classList.remove('incorrect');
+          }
+        }
+      }
+      
+      if (!anyincorrect) {
+        mF = document.getElementsByClassName('mainForm');
+        mF.item(0).style.display = 'none';
+        mF.item(1).style.display = 'initial';
+      } else {
+        <!-- alert('incorrect'); -->
+        e.preventDefault();
+      }
+    })
+  </script>
+</apex:page>

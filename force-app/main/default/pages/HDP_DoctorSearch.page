@@ -1,0 +1,119 @@
+<!--
+ - Created by alisa.borkowska on 01.12.2022.
+ -->
+
+<apex:page id="HDP_DoctorSearch" controller="HDP_DoctorSearchController" setup="false" sidebar="false" showheader="true"
+           tabStyle="Doctor__c">
+    <apex:sectionHeader title="Doctors" subtitle="Search doctors"/>
+    <apex:form >
+        <apex:pageBlock title="Search Doctors">
+            <apex:pageBlockSection columns="2" collapsible="false" id="formFields">
+                <apex:inputtext label="First Name" value="{!searchFirstName}"/>
+                <apex:inputtext label="Last Name" value="{!searchLastName}"/>
+                <apex:inputtext label="Email" value="{!searchEmail}"/>
+                <apex:selectList label="Country" value="{!searchCountry}" size="1">
+                    <apex:selectOptions value="{!countryOptions}"/>
+                </apex:selectList>
+            </apex:pageBlockSection>
+            <div align="center">
+                <apex:commandButton value="Search" action="{!searchDoctorRecords}" reRender="loading, clearButton" status="loading"/>
+
+                <apex:commandButton disabled="{!isCleared}" value="Clear" action="{!clearDoctorRecords}"
+                                    reRender="loading,clearButton" id="clearButton"/>
+            </div>
+        </apex:pageBlock>
+        <apex:actionStatus id="loading">
+            <apex:facet name="start">
+                <center>
+                    <img src="{!URLFOR($Resource.Spinner)}" width="180" height="100"/>
+                </center>
+            </apex:facet>
+            <apex:facet name="stop">
+                <apex:pageBlock title="Search Results: ({!resultSize})" rendered="{!!isCleared}"
+                                id="doctorsTable">
+                    <apex:pageBlockTable value="{!pagedDoctorsList}" var="doc" rendered="{!!isEmpty}">
+                        <apex:column headerValue="Actions">
+                            <apex:outputLink value="{!URLFOR($Action.Doctor__c.View, doc.Id) }" target="_blank">
+                                View
+                            </apex:outputLink>
+                            /
+                            <apex:outputLink value="{!URLFOR($Action.Doctor__c.Edit, doc.Id) }" target="_blank">
+                                Edit
+                            </apex:outputLink>
+                        </apex:column>
+                        <apex:column value="{!doc.Name}">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{! sortByFullName }"
+                                                  reRender="doctorsTable">Full Name
+                                </apex:commandLink>
+                            </apex:facet>
+                        </apex:column>
+                        <apex:column value="{!doc.Email__c}">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{! sortByEmail }"
+                                                  reRender="doctorsTable">Email
+                                </apex:commandLink>
+                            </apex:facet>
+                        </apex:column>
+                        <apex:column value="{!doc.License_Number__c}">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{! sortByLicenseNumber }"
+                                                  reRender="doctorsTable">License Number
+                                </apex:commandLink>
+                            </apex:facet>
+                        </apex:column>
+                        <apex:column value="{!doc.Street__c},{!doc.City__c},{!doc.Country__c}">
+                            <apex:facet name="header">
+                                <apex:commandLink action="{! sortByFullAddress }"
+                                                  reRender="doctorsTable">Full Address
+                                </apex:commandLink>
+                            </apex:facet>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                    <table style="width: 100%">
+                        <tr>
+                            <td>
+                                Page:
+                                <apex:outputText value=" {!pageNumber+1} of {! CEILING(resultSize / pageSize) }"/>
+                            </td>
+                            <td align="center">
+                                <apex:commandLink action="{! first }" value="« First"/>
+                                <apex:commandLink action="{! previous }" value="« Previous"
+                                                  rendered="{! hasPrevious }"/>
+
+                                <apex:outputText style="color: #ccc;" value="« Previous"
+                                                 rendered="{! NOT(hasPrevious) }"/>
+                                &nbsp;&nbsp;
+
+                                <apex:commandLink action="{! next }" value="Next »"
+                                                  rendered="{! hasNext }"/>
+
+                                <apex:outputText style="color: #ccc;" value="Next »"
+                                                 rendered="{! NOT(hasNext) }"/>
+                                <apex:commandLink action="{! last }" value="Last »"/>
+                            </td>
+                            <td align="right">
+                                Records per page:
+                                <apex:selectList value="{! pageSize }" size="1">
+                                    <apex:selectOption itemValue="2" itemLabel="2"/>
+                                    <apex:selectOption itemValue="5" itemLabel="5"/>
+                                    <apex:selectOption itemValue="20" itemLabel="20"/>
+                                    <apex:actionSupport event="onchange" action="{!reloadPagedDoctors}"
+                                                        reRender="doctorsTable"/>
+                                </apex:selectList>
+                            </td>
+                        </tr>
+                    </table>
+                    <apex:pageBlock rendered="{!isEmpty}">
+                            {!$Label.No_results}
+                    </apex:pageBlock>
+                    <apex:pageBlock title="Export" rendered="{!!isEmpty}">
+                        <apex:commandLink action="{!exportCSV}" value="CSV"/>
+                        <br/>
+                        <apex:commandLink action="{!exportXLS}" value="XLS"/>
+                    </apex:pageBlock>
+                </apex:pageBlock>
+            </apex:facet>
+        </apex:actionStatus>
+    </apex:form>
+</apex:page>

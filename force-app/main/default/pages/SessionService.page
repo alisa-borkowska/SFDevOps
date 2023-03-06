@@ -1,0 +1,4 @@
+<apex:page id="SessionService">
+    Start_Of_Session_Id{!$Api.Session_ID}End_Of_Session_Id
+    Start_of_Partner_Server_URL{!$Api.Partner_Server_URL_530}End_of_Partner_Server_URL
+</apex:page>

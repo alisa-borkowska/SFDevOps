@@ -1,0 +1,188 @@
+<apex:page id="Organization" controller="OrganisationController" setup="false" sidebar="false" showheader="true"
+           tabStyle="User" action="{!getData}"
+           title="Organization">
+    <apex:form >
+        <head>
+            <apex:slds />
+        </head>
+        <apex:outputPanel id="sessionIdPrompt" styleClass="slds-fade-in-open" rendered="{!sessionIdPromptShown}"
+                          style="position: fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; background: #222a; z-index: 100; display: block;">
+            <div style="position: fixed; left: 30%; top: 30%; width: 40%; height: 40%; z-index: 101;"
+                 class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" style="font-size: 2em;">Session
+                        ID</h1>
+                    <p class="slds-m-top_x-small" style="word-wrap: break-word;">{!GETSESSIONID()}</p>
+                </div>
+                <div class="slds-modal__footer">
+                    <center>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%"
+                                            value="OK" action="{!hideSessionIdPrompt}"
+                                            status="loading">
+                        </apex:commandButton>
+                    </center>
+                </div>
+            </div>
+        </apex:outputPanel>
+        <div class="slds-page-header" role="banner">
+            <div class="slds-grid">
+                <div class="slds-col slds-has-flexi-truncate">
+                    <p class="slds-text-heading_label slds-truncate" title="Organization">Organization</p>
+                    <div class="slds-grid slds-m-left_small">
+                        <h1 class="slds-text-heading_medium slds-truncate" title="Info">Info</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <article class="slds-card">
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+        <span class="slds-icon_container slds-icon-standard-account" title="account">
+          <span class="slds-assistive-text">account</span>
+        </span>
+                        </div>
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title">
+                                <a href="#" class="slds-card__header-link slds-truncate" title="Accounts">
+                                    <span>Session Id</span>
+                                </a>
+                            </h2>
+                        </div>
+                        <div class="slds-no-flex">
+                            <apex:commandButton value="Show Session ID" action="{!showSessionIdPrompt}"
+                                                styleClass="slds-button slds-button_brand"/>
+                        </div>
+                    </header>
+                </div>
+            </article>
+            <article class="slds-card">
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+
+                        </div>
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title">
+                                <a href="#" class="slds-card__header-link slds-truncate" title="Apex Classes">
+                                    <span>Apex Classes</span>
+                                </a>
+                            </h2>
+                        </div>
+                    </header>
+                </div>
+                <div class="slds-card__body slds-card__body_inner">{!apexClassesCount}</div>
+            </article>
+            <article class="slds-card">
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+
+                        </div>
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title">
+                                <a href="#" class="slds-card__header-link slds-truncate" title="Apex Pages">
+                                    <span>Apex Pages</span>
+                                </a>
+                            </h2>
+                        </div>
+                    </header>
+                </div>
+                <div class="slds-card__body slds-card__body_inner">{!apexPagesCount}</div>
+            </article>
+            <article class="slds-card">
+            <div class="slds-card__header slds-grid">
+                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                    <div class="slds-media__figure">
+
+                    </div>
+                    <div class="slds-media__body">
+                        <h2 class="slds-card__header-title">
+                            <a href="#" class="slds-card__header-link slds-truncate" title="Apex Licenses">
+                                <span>Apex Licenses:</span>
+                            </a>
+                        </h2>
+                    </div>
+                </header>
+            </div>
+            <div class="slds-card__body slds-card__body_inner">{!apexLicensesCount}</div>
+        </article>
+            <article class="slds-card">
+                <div class="slds-card__header slds-grid">
+                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        <div class="slds-media__figure">
+
+                        </div>
+                        <div class="slds-media__body">
+                            <h2 class="slds-card__header-title">
+                                <a href="#" class="slds-card__header-link slds-truncate" title="API calls">
+                                    <span>API calls:</span>
+                                </a>
+                            </h2>
+                        </div>
+                    </header>
+                </div>
+                <div class="slds-card__body slds-card__body_inner">{!usedApiCalls}</div>
+            </article>
+        </div>
+        <apex:outputPanel id="usersTable">
+            <apex:outputPanel rendered="{!isError==true}">
+                <span style="color: red">{!respond}</span>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!isSuccess==true}">
+                <span style="color: lime">Success!</span>
+            </apex:outputPanel>
+            <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                <thead>
+                <tr class="slds-line-height_reset">
+
+                    <th scope="col" class="slds-text-title_caps">
+                        FULL NAME
+                    </th>
+                    <th scope="col" class="slds-text-title_caps">
+                        EMAIL
+                    </th>
+                    <th scope="col" class="slds-text-title_caps">
+                        PROFILE
+                    </th>
+                    <th scope="col" class="slds-text-title_caps">
+                        TIME ZONE
+                    </th>
+                    <th scope="col" class="slds-text-title_caps">
+                        LAST LOGIN DATE
+                    </th>
+                    <th scope="col" class="slds-text-title_caps">
+                        LAST LOGIN DEVICE
+                    </th>
+                    <th scope="col" class="slds-text-title_caps">
+                        ACTIONS
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <apex:repeat value="{!usersList}" var="use" id="usersRepeat">
+                    <tr>
+                        <td>{!use.Name}</td>
+                        <td>{!use.Email}</td>
+                        <td>{!use.Profile.name}</td>
+                        <td>{!use.TimeZoneSidKey}</td>
+                        <td>{!use.LastLoginDate}</td>
+                        <td>?</td>
+                        <td>
+                            <apex:outputLink value="{!URLFOR($Action.User.View, use.Id)}" target="_blank">
+                                View
+                            </apex:outputLink>
+                            /
+                            <apex:commandLink reRender="usersTable" action="{!passUserToDeactivate}">
+                                <apex:param value="{!use.Id}" name="userToDeactivate" assignTo="{!userToDeactivate}"/>
+                                Deactivate
+                            </apex:commandLink>
+                        </td>
+                    </tr>
+                </apex:repeat>
+                </tbody>
+            </table>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

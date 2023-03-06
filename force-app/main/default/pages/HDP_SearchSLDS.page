@@ -1,0 +1,478 @@
+<!--
+ - Created by alisa.borkowska on 15.12.2022.
+ -->
+
+<apex:page id="HDP_SearchSLDS" controller="HDP_SearchSLDSController" setup="false" sidebar="false" showheader="true"
+           title="Doctor Search REST API">
+    <head>
+        <apex:slds />
+        <script>
+            const clearInputs = () => {
+                let fields = document.getElementById('inputFields')
+                for (f of fields.children) {
+                    inp=f.getElementsByTagName('input');
+                    inp[0].value=""
+                }
+            }
+        </script>
+    </head>
+    <div class="slds-page-header" role="banner">
+        <div class="slds-grid">
+            <div class="slds-col slds-has-flexi-truncate">
+                <p class="slds-text-heading_label slds-truncate" title="Doctors">Doctors</p>
+                <div class="slds-grid slds-m-left_small">
+                    <h1 class="slds-text-heading_medium slds-truncate" title="Search external doctors">Search external
+                        doctors</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <apex:form >
+        <apex:outputPanel id="errorHandling" styleClass="slds-fade-in-open" rendered="{!promptErrorHandling}"
+                          style="position: fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; background: #222a; z-index: 101; display: block;">
+            <div style="position: fixed; left: 30%; top: 30%; width: 40%; height: 40%; z-index: 101;"
+                 class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-05" class="slds-modal__title slds-hyphenate" style="font-size: 2em;"> Invalid data: </h1>
+                    <p class="slds-m-top_x-small"> {!respond} </p>
+                </div>
+                <div class="slds-modal__footer">
+                    <center>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%" value="Cancel"
+                                            action="{!hideErrorPopup}" status="loading">
+                            <apex:actionSupport reRender="prompt, doctorsTable"/>
+                        </apex:commandButton>
+                    </center>
+                </div>
+            </div>
+        </apex:outputPanel>
+    </apex:form>
+    <apex:form >
+        <apex:outputPanel id="prompt" styleClass="slds-fade-in-open" rendered="{!promptBeforeDelete}"
+                          style="position: fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; background: #222a; z-index: 100; display: block;">
+            <div style="position: fixed; left: 30%; top: 30%; width: 40%; height: 40%; z-index: 101;"
+                 class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" style="font-size: 2em;">Are you
+                        sure?</h1>
+                    <p class="slds-m-top_x-small">Are you sure you want to delete this object?</p>
+                </div>
+                <div class="slds-modal__footer">
+                    <center>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%"
+                                            value="Delete Doctor" action="{!deleteDoctorFromParams}"
+                                            status="loading">
+                            <apex:actionSupport reRender="prompt, loading"/>
+                        </apex:commandButton>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%" value="Cancel"
+                                            action="{!hidePopup}" status="loading">
+                            <apex:actionSupport reRender="prompt, doctorsTable"/>
+                        </apex:commandButton>
+                    </center>
+                </div>
+            </div>
+        </apex:outputPanel>
+    </apex:form>
+    <apex:form >
+        <apex:outputPanel id="createPrompt" styleClass="slds-fade-in-open" rendered="{!promptBeforeCreate}"
+                          style="position: fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; background: #222a; z-index: 100; display: block;">
+            <div style="position: fixed; left: 30%; top: 30%; width: 40%; height: 40%; z-index: 101;"
+                 class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate" style="font-size: 2em;">Create
+                        doctor</h1>
+                </div>
+                <div style="background: white">
+                    <div class="slds-grid slds-wrap" id="inputFieldsCreate">
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="cinput-01"><abbr class="slds-required" title="required">* </abbr>First Name</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.firstName}" styleClass="slds-input" id="cinput-01"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="cinput-02"><abbr class="slds-required" title="required">* </abbr>Last Name</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.lastName}" styleClass="slds-input" id="cinput-02"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="cinput-06">Nationality</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.nationality}" styleClass="slds-input" id="cinput-06"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="cinput-12">Date of birth (YYYY-MM-DD)</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.dateOfBirth}" styleClass="slds-input" id="cinput-12"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="cinput-03"><abbr class="slds-required" title="required">* </abbr>Email</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.email}" styleClass="slds-input" id="cinput-03"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="cinput-05">Phone</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.phone}" styleClass="slds-input" id="cinput-05"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="cinput-07">Street</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.street}" styleClass="slds-input" id="cinput-07"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="cinput-13">City</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.city}" styleClass="slds-input" id="cinput-13"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="cinput-10">Postal Code</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.postalCode}" styleClass="slds-input" id="cinput-10"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="cinput-04"><abbr class="slds-required" title="required">* </abbr>Country</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.country}" styleClass="slds-input" id="cinput-04"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="cinput-08">Start of Career (YYYY-MM-DD)</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.startOfCareer}" styleClass="slds-input" id="cinput-08"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="cinput-09">Speciality</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.speciality}" styleClass="slds-input" id="cinput-09"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 2.5%!important">
+                            <label class="slds-form-element__label" for="cinput-11">License Number</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.licenseNumber}" styleClass="slds-input" id="cinput-11"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <center>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%"
+                                            value="Apply" action="{!createDoctorRecords}"
+                                            status="loading">
+                            <apex:actionSupport reRender="createPrompt, loading, doctorsTable, errorHandling"/>
+                        </apex:commandButton>
+                        <apex:actionSupport reRender="prompt, loading"/>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%" value="Cancel"
+                                            action="{!hideCreatePopup}" status="loading">
+                            <apex:actionSupport reRender="createPrompt, loading"/>
+                        </apex:commandButton>
+                    </center>
+                </div>
+            </div>
+        </apex:outputPanel>
+    </apex:form>
+    <apex:form >
+        <apex:outputPanel id="editPrompt" styleClass="slds-fade-in-open" rendered="{!promptBeforeEdit}"
+                          style="position: fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; background: #222a; z-index: 100; display: block;">
+            <div style="position: fixed; left: 30%; top: 30%; width: 40%; height: 40%; z-index: 101;"
+                 class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" style="font-size: 2em;">Edit
+                        doctor</h1>
+                </div>
+                <div style="background: white">
+                    <div class="slds-grid slds-wrap" id="inputFields">
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="einput-01"><abbr class="slds-required" title="required">* </abbr>First Name</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.firstName}" styleClass="slds-input" id="einput-01"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="einput-02"><abbr class="slds-required" title="required">* </abbr>Last Name</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.lastName}" styleClass="slds-input" id="einput-02"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="einput-06">Nationality</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.nationality}" styleClass="slds-input" id="einput-06"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                            <label class="slds-form-element__label" for="einput-12">Date of birth (YYYY-MM-DD)</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.dateOfBirth}" styleClass="slds-input" id="einput-12"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="einput-03"><abbr class="slds-required" title="required">* </abbr>Email</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.email}" styleClass="slds-input" id="einput-03"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="einput-05">Phone</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.phone}" styleClass="slds-input" id="einput-05"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="einput-07">Street</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.street}" styleClass="slds-input" id="einput-07"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="einput-13">City</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.city}" styleClass="slds-input" id="einput-13"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="einput-10">Postal Code</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.postalCode}" styleClass="slds-input" id="einput-10"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 3.5%!important">
+                            <label class="slds-form-element__label" for="einput-04"><abbr class="slds-required" title="required">* </abbr>Country</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.country}" styleClass="slds-input" id="einput-04"/>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="einput-08">Start of Career (YYYY-MM-DD)</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.startOfCareer}" styleClass="slds-input" id="einput-08"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small slds-border_top">
+                            <label class="slds-form-element__label" for="einput-09">Speciality</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.speciality}" styleClass="slds-input" id="einput-09"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small" style="margin-bottom: 2.5%!important">
+                            <label class="slds-form-element__label" for="einput-11">License Number</label>
+                            <div class="slds-form-element__control">
+                                <apex:inputText value="{!ext.licenseNumber}" styleClass="slds-input" id="einput-11"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <center>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%"
+                                            value="Apply" action="{!editDoctorFromParams}"
+                                            status="loading">
+                            <apex:actionSupport reRender="editPrompt, loading, doctorsTable, errorHandling"/>
+                        </apex:commandButton>
+                        <apex:actionSupport reRender="prompt, loading"/>
+                        <apex:commandButton styleClass="slds-button slds-button_brand" style="margin: 1%" value="Cancel"
+                                            action="{!hideEditPopup}" status="loading">
+                            <apex:actionSupport reRender="editPrompt, loading"/>
+                        </apex:commandButton>
+                    </center>
+                </div>
+            </div>
+        </apex:outputPanel>
+    </apex:form>
+    <br/>
+    <apex:form >
+        <div align = "center" >
+            <apex:commandButton value="Create New Doctor" action="{!showCreatePopup}"
+                                styleClass="slds-button slds-button_brand">
+                <apex:actionSupport reRender="createPrompt" />
+            </apex:commandButton>
+        </div>
+    </apex:form>
+    <apex:form >
+        <div class="slds-grid slds-wrap" id="inputFields">
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="input-01">First Name</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!searchFields.firstName}" styleClass="slds-input" id="input-01"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="input-02">Last Name</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!searchFields.lastName}" styleClass="slds-input" id="input-02"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="input-03">Email</label>
+                <div class="slds-form-element__control">
+                    <apex:inputText value="{!searchFields.email}" styleClass="slds-input" id="input-03"/>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                <label class="slds-form-element__label" for="select-01">Country</label>
+                <div class="slds-form-element__control">
+                    <div class="slds-select_container">
+                        <apex:selectList value="{! searchFields.country }" size="1" styleClass="slds-select" id="select-01">
+                            <apex:selectOptions value="{!countryOptions}"/>
+                        </apex:selectList>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div align="center">
+            <apex:commandButton value="Search" action="{!searchDoctorRecords}"
+                                reRender="loading, clearButton, doctorsTable, noResults"
+                                status="loading" styleClass="slds-button slds-button_brand"/>
+
+            <apex:commandButton disabled="{!isCleared}" value="Clear" action="{!clearDoctorRecords}"
+                                reRender="loading,clearButton,doctorsTable,noResults,inputFields" id="clearButton"
+                                onComplete="clearInputs();"
+                                styleClass="slds-button slds-button_brand"/>
+        </div>
+    </apex:form>
+    <apex:form >
+        <div style="margin: 2%;"/>
+        <apex:actionStatus id="loading">
+            <apex:facet name="start">
+                <div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </apex:facet>
+            <apex:facet name="stop">
+                <apex:outputPanel rendered="{!!isCleared}" id="doctorsTable">
+                    <hr/>
+                    <div class="slds-page-header" role="banner">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-has-flexi-truncate">
+                                <p class="slds-text-heading_label slds-truncate" title="Doctors">{!resultSize} results</p>
+                                <div class="slds-grid slds-m-left_small">
+                                    <h1 class="slds-text-heading_medium slds-truncate" title="Search Results">Search Results</h1>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <apex:outputPanel rendered="{!!isEmpty}">
+                    <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                        <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" class="slds-text-title_caps">
+                                Actions
+                            </th>
+                            <th scope="col" class="slds-text-title_caps">
+                                Full Name
+                            </th>
+                            <th scope="col" class="slds-text-title_caps">
+                                Email
+                            </th>
+                            <th scope="col" class="slds-text-title_caps">
+                                License Number
+                            </th>
+                            <th scope="col" class="slds-text-title_caps">
+                                Full Address
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <apex:repeat value="{!pagedDoctorsList}" var="doc" rendered="{!!isEmpty}" id="doctorsRepeat">
+                            <tr>
+
+                                <td>
+                                    <apex:commandLink action="{!showEditPopup}">
+                                        <apex:actionSupport reRender="editPrompt"/>
+                                        <apex:param name="idToEdit" value="{!doc.doctorId}"/>
+                                        Edit
+                                    </apex:commandLink>
+                                    /
+                                    <apex:commandLink action="{!showPopup}">
+                                        <apex:param name="idToDelete" value="{!doc.doctorId}"/>
+                                        Delete
+                                    </apex:commandLink>
+                                </td>
+                                <td>{!doc.firstName} {!doc.lastName}</td>
+                                <td>{!doc.email}</td>
+                                <td>{!doc.licenseNumber}</td>
+                                <td>{!doc.street} {!doc.city} {!doc.country}</td>
+                            </tr>
+                        </apex:repeat>
+                        </tbody>
+                    </table>
+                    <table style="width: 100%">
+                        <tr>
+                            <td>
+                                Page:
+                                <apex:outputText value=" {!pageNumber+1} of {! CEILING(resultSize / pageSize) }"/>
+                            </td>
+                            <td align="center">
+                                <apex:commandLink action="{! first }" value="« First"/>
+                                <apex:commandLink action="{! previous }" value="« Previous"
+                                                  rendered="{! hasPrevious }"/>
+
+                                <apex:outputText style="color: #ccc;" value="« Previous"
+                                                 rendered="{! NOT(hasPrevious) }"/>
+                                &nbsp;&nbsp;
+
+                                <apex:commandLink action="{! next }" value="Next »"
+                                                  rendered="{! hasNext }"/>
+
+                                <apex:outputText style="color: #ccc;" value="Next »"
+                                                 rendered="{! NOT(hasNext) }"/>
+                                <apex:commandLink action="{! last }" value="Last »"/>
+                            </td>
+                            <td align="right">
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label" for="page-size-select">Records per
+                                        page:</label>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
+                                            <apex:selectList value="{! pageSize }" size="1" styleClass="slds-select">
+                                                <apex:selectOption itemValue="5" itemLabel="5"/>
+                                                <apex:selectOption itemValue="20" itemLabel="20"/>
+                                                <apex:selectOption itemValue="100" itemLabel="100"/>
+                                                <apex:actionSupport event="onchange" action="{!reloadPagedDoctors}"
+                                                                    reRender="doctorsTable"/>
+                                            </apex:selectList>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!isEmpty}">
+                        <center>
+                            {!$Label.No_results}
+                        </center>
+                    </apex:outputPanel>
+                    <apex:outputPanel title="Export" rendered="{!!isEmpty}">
+                        <hr/>
+                        <div class="slds-page-header__title slds-m-right_small" rendered="{!!isCleared}">
+                            <h2 class="slds-text-heading_medium slds-truncate">Export</h2>
+                        </div>
+                        <apex:commandButton action="{!exportCSV}" value="CSV" styleClass="slds-button slds-button_brand"
+                                            style="margin: .5%;"/>
+                        <apex:commandButton action="{!exportXLS}" value="XLS" styleClass="slds-button slds-button_brand"
+                                            style="margin: .5%;"/>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+            </apex:facet>
+        </apex:actionStatus>
+    </apex:form>
+</apex:page>
