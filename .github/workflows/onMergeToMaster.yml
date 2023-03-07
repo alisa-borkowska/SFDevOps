@@ -1,0 +1,53 @@
+# This is a basic workflow to help you get started with Actions
+
+name: onMergeToMaster
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  #* pull_request:
+  #*   types:
+  #*     - closed
+  push:
+    branches:
+      - master
+  
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    #* if: github.event.pull_request.merged == true
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    # Setup Node
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16
+    
+    # Install SFDX CLI
+    - name: Install SFDX CLI
+      run: npm install sfdx-cli --global
+
+    # Authorize SF Org
+    - name: Authorize SF Org
+      env:
+        CLIENT_ID: ${{ secrets.SALESFORCEPRODCLIENTID }}
+        USERNAME: ${{ secrets.SALESFORCEPRODUSERNAME }}
+        INSTANCE_URL: ${{ secrets.SALESFORCEPRODINSTANCEURL }}
+      run: sfdx force:auth:jwt:grant --clientid $CLIENT_ID --jwtkeyfile ./buildfiles/server.key --username $USERNAME --instanceurl $INSTANCE_URL -a prod
+
+    # Convert to Deploy Source
+    - name: Convert to Deploy Source
+      run: sfdx force:source:convert -r ./force-app -d ./toDeploy    
+    
+    # Deploy
+    - name : Deploy to SF Org
+      run: sfdx force:mdapi:deploy -l NoTestRun -d ./toDeploy -u prod -w 10
