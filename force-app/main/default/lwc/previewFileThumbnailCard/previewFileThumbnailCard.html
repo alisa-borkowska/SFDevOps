@@ -1,0 +1,48 @@
+<template>
+    <template if:true={file}>
+      <c-preview-file-modal
+        url={file.downloadUrl}
+        file-extension={file.Extension}
+      ></c-preview-file-modal>
+      <li
+        class="
+          slds-col
+          slds-var-p-vertical_x-small
+          slds-small-size_1-of-2
+          slds-medium-size_1-of-4
+          slds-large-size_1-of-6
+        "
+      >
+        <div
+          class="slds-file slds-file_card slds-has-title"
+          style="width: 14rem"
+          onclick={filePreview}
+        >
+          <figure> 
+            <a class="slds-file__crop slds-file__crop_4-by-3 slds-m-top_x-small">
+              <img src={thumbnail} alt={file.title} />
+            </a>
+          </figure>  
+        </div>
+        
+        <div style="top: 3px; right: 5px; z-index: 10">
+          <lightning-button-menu
+            alternative-text="Show File Menu"
+            variant="border-filled"
+            icon-size="xx-small"
+          >
+            <lightning-menu-item
+              value="default"
+              label="Set as default"
+              onclick={setAsDefault}
+            ></lightning-menu-item>
+            <lightning-menu-item
+              value="delete"
+              label="Delete"
+              onclick={deleteItem}
+            ></lightning-menu-item>
+          </lightning-button-menu>
+        </div>
+      </li>
+    </template>
+  </template>

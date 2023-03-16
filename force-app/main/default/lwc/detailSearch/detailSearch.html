@@ -1,0 +1,21 @@
+<template>
+    <lightning-layout class="detailSearch" size="12" horizontal-align="center">
+        <lightning-layout-item>
+            <lightning-combobox name="genre" label="Genre" value={paramStrings.genre.value}
+                placeholder="Select Genre" options={genres} onchange={onGenre} float="left"
+                style="margin:2vh"></lightning-combobox>
+        </lightning-layout-item>
+        <lightning-layout-item>
+            <lightning-input name="country" label="Country" value={value} placeholder="Select Country"
+                onchange={onCountry} float="center" style="margin:2vh"></lightning-input>
+        </lightning-layout-item>
+        <lightning-layout-item>
+            <lightning-input name="year" label="Year" value={value} placeholder="Select Year" onchange={onYear}
+                float="right" style="margin:2vh"></lightning-input>
+        </lightning-layout-item>
+        <lightning-layout-item style="padding-top: 4.5vh">
+            <lightning-button variant="brand-outline" class="slds-m-left_x-small searchButton"
+                label="Search" onclick={searchMovies}></lightning-button>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>
